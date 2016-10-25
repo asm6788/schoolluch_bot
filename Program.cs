@@ -267,9 +267,15 @@ namespace schoolluch_bot
         static System.Timers.Timer timer = null;
         static void Main(string[] args)
         {
+            System.Timers.Timer 시간제한 = new System.Timers.Timer(10000);
+            시간제한.AutoReset = false;
+            시간제한.Elapsed += 시간제한_Elapsed;
+            Console.WriteLine("10초안에 선택하십시요.(기본값:정상작동)");
+            시간제한.Start();
             Console.WriteLine("1.초기화");
             Console.WriteLine("2.정상작동");
-            if (Console.ReadLine() == "1")
+            string temp = Console.ReadLine();
+            if (temp == "1")
             {
                 Console.WriteLine("초기화중");
                 Bot.OnCallbackQuery += BotOnCallbackQueryReceived;
@@ -279,61 +285,48 @@ namespace schoolluch_bot
                 var me = Bot.GetMeAsync().Result;
                 Console.ReadLine();
             }
-            else
+            else if(temp == "2")
             {
-                Bot.OnCallbackQuery += BotOnCallbackQueryReceived;
-                Bot.OnMessage += BotOnMessageReceived;
-                Bot.OnInlineResultChosen += BotOnChosenInlineResultReceived;
-                Bot.OnReceiveError += BotOnReceiveError;
-
-                var me = Bot.GetMeAsync().Result;
-                timer = new System.Timers.Timer(TimeSpan.FromHours(24 - DateTime.Now.Hour).TotalMilliseconds);
-                
-                timer.Elapsed += Timer_Elapsed;
-                timer.Start();
-
-                bool 찾음 = false;
-                List<급식구독자> p = new List<급식구독자>();
-                BinaryFormatter binFmt = new BinaryFormatter();
-                using (FileStream rdr = new FileStream("구독자", FileMode.Open))
-                {
-                    p = (List<급식구독자>)binFmt.Deserialize(rdr);
-                    rdr.Dispose();
-                }               
-                구독자정보 = p;
-                Console.WriteLine("급식구독자 급식전송중");
-                List<급식> 급식메뉴다 = new List<급식>();
-                for (int i = 0; i < 구독자정보.Count; i++)
-                {
-                    급식메뉴다 = 급식불러오기(DateTime.Now.Year, DateTime.Now.Month, Convert.ToString(구독자정보[i].급식정정보들.학교코드), 구독자정보[i].급식정정보들.관활지역, 구독자정보[i].급식정정보들.학교종류);
-                    for (int ii = 0; ii < 급식메뉴다.Count; ii++)
-                    {
-                        if (급식메뉴다[ii].날짜 == DateTime.Now.Day)
-                        {
-                            Bot.SendTextMessageAsync(구독자정보[i].ID, 급식메뉴다[ii].급식메뉴);
-                            찾음 = true;
-                            break;
-                        }
-                    }
-                    if (!찾음)
-                    {
-                        Bot.SendTextMessageAsync(구독자정보[i].ID, "급식이 없습니다");
-                    }
-                }
-                Console.WriteLine("완료");
-                Console.Title = me.Username;
-                Bot.StartReceiving();
-                Console.WriteLine("엔터 로 종료합니다");
-                Console.ReadLine();
-                Console.WriteLine("봇종료");
-                Bot.StopReceiving();
-                using (FileStream fs = new FileStream("구독자", FileMode.Create))
-                {
-                    binFmt.Serialize(fs, 구독자정보);
-                }
+                시간제한.Stop();
+                시작();
             }
         }
 
+        private static void 시간제한_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            시작();
+        }
+        public static void 시작()
+        {
+            Console.WriteLine("정상작동 시작");
+            Bot.OnCallbackQuery += BotOnCallbackQueryReceived;
+            Bot.OnMessage += BotOnMessageReceived;
+            Bot.OnInlineResultChosen += BotOnChosenInlineResultReceived;
+            Bot.OnReceiveError += BotOnReceiveError;
+
+            var me = Bot.GetMeAsync().Result;
+            timer = new System.Timers.Timer(TimeSpan.FromHours(24 - DateTime.Now.Hour).TotalMilliseconds);
+            timer.Elapsed += Timer_Elapsed;
+            timer.Start();
+            List<급식구독자> p = new List<급식구독자>();
+            BinaryFormatter binFmt = new BinaryFormatter();
+            using (FileStream rdr = new FileStream("구독자", FileMode.Open))
+            {
+                p = (List<급식구독자>)binFmt.Deserialize(rdr);
+                rdr.Dispose();
+            }
+            구독자정보 = p;     
+            Console.Title = me.Username;
+            Bot.StartReceiving();
+            Console.WriteLine("엔터 로 종료합니다");
+            Console.ReadLine();
+            Console.WriteLine("봇종료");
+            Bot.StopReceiving();
+            using (FileStream fs = new FileStream("구독자", FileMode.Create))
+            {
+                binFmt.Serialize(fs, 구독자정보);
+            }
+        }
         private static void Reset(object sender, MessageEventArgs e)
         {
             
