@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using System.Xml.Linq;
 using Telegram.Bot;
@@ -24,6 +26,150 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace schoolluch_bot
 {
+    public enum 학교종류
+    {
+        에러,
+        초,
+        중,
+        고
+    }
+    public class 학교정보
+    {
+        // string 지역;
+        public 학교종류 초중고;
+        public string 학교이름;
+        public string 학교코드;
+        // string 학생수및성비;
+        public string 학교주소;
+        //   string 교원수및성비;
+        //  string 전화;
+        // string 팩스;
+        // string 설립구분;
+        // string 설립유형;
+        public string 홈페이지;
+
+        public 학교정보(string 홈페이지, string 학교주소, string 학교코드, string 학교이름, 학교종류 초중고)
+        {
+            this.홈페이지 = 홈페이지;
+            this.학교주소 = 학교주소;
+            this.학교코드 = 학교코드;
+            this.학교이름 = 학교이름;
+            this.초중고 = 초중고;
+        }
+    }
+
+    public class 학교정보처리
+    {
+        public static List<학교정보> 학교정보파싱(string 검색학교)
+        {
+            HttpWebRequest wReq;
+            Stream PostDataStream;
+            Stream respPostStream;
+            StreamReader readerPost;
+            HttpWebResponse wResp;
+            StringBuilder postParams = new StringBuilder();
+            List<학교정보> 학교정보들 = new List<학교정보>();
+            string 학교이름 = "";
+            string 학교코드 = "";
+            string 학교주소 = "";
+            string 학교홈페이지 = "";
+            학교종류 초중고 = 학교종류.에러;
+            //SEARCH_GS_HANGMOK_CD=&SEARCH_GS_HANGMOK_NM=&SEARCH_SCHUL_NM=%BF%F9%B0%E8%C1%DF&SEARCH_GS_BURYU_CD=&SEARCH_KEYWORD=%BF%F9%B0%E8%C1%DF
+            //보낼 데이터 추
+            postParams.Append("SEARCH_GS_HANGMOK_CD=");
+            postParams.Append("&SEARCH_GS_HANGMOK_NM=");
+            postParams.Append("&SEARCH_SCHUL_NM=" + HttpUtility.UrlEncode(검색학교, Encoding.GetEncoding("euc-kr")));
+            postParams.Append("&SEARCH_GS_BURYU_CD=");
+            postParams.Append("&SEARCH_KEYWORD=" + HttpUtility.UrlEncode(검색학교, Encoding.GetEncoding("euc-kr")));
+
+            //Encoding 정의 및 보낼 데이터 정보를 Byte배열로 변환(String -> Byte[])
+            Encoding encoding = Encoding.UTF8;
+            byte[] result = encoding.GetBytes(postParams.ToString());
+            //<p class="School_Division">
+            //보낼 곳과 데이터 보낼 방식 정의
+            wReq = (HttpWebRequest)WebRequest.Create("http://www.schoolinfo.go.kr/ei/ss/Pneiss_f01_l0.do");
+            wReq.Method = "POST";
+            wReq.ContentType = "application/x-www-form-urlencoded";
+            wReq.ContentLength = result.Length;
+
+            string temp;
+            //데이터 전송
+            PostDataStream = wReq.GetRequestStream();
+            PostDataStream.Write(result, 0, result.Length);
+            PostDataStream.Close();
+            wResp = (HttpWebResponse)wReq.GetResponse();
+            respPostStream = wResp.GetResponseStream();
+            readerPost = new StreamReader(respPostStream, Encoding.Default);
+            String resultPost = readerPost.ReadToEnd();
+            //     Console.WriteLine(resultPost);
+            while (true)
+            {
+                resultPost = resultPost.Remove(0, resultPost.IndexOf("School_Name")).Remove(0, 76);
+                temp = resultPost;
+                학교이름 = resultPost = resultPost.Remove(resultPost.IndexOf("<"), resultPost.Length - resultPost.IndexOf("<"));
+                if (!isContainHangul(학교이름))
+                {
+                    break;
+                }
+                resultPost = temp;
+                resultPost = resultPost.Remove(0, resultPost.IndexOf("School_Division"));
+                resultPost = resultPost.Remove(0, 45);
+                resultPost = resultPost.Remove(0, resultPost.IndexOf("mapD_Class"));
+                resultPost = resultPost.Remove(0, 16);
+                temp = resultPost;
+                resultPost = resultPost.Remove(resultPost.IndexOf("</span>"), resultPost.Length - resultPost.IndexOf("</span>"));
+                if (resultPost == "초")
+                {
+                    초중고 = 학교종류.초;
+                }
+                else if (resultPost == "중")
+                {
+                    초중고 = 학교종류.중;
+                }
+                else if (resultPost == "고")
+                {
+                    초중고 = 학교종류.고;
+                }
+                resultPost = temp;
+                resultPost = resultPost.Remove(0, resultPost.IndexOf("searchSchul")).Remove(0, 12);
+                temp = resultPost;
+                resultPost = resultPost.Remove(resultPost.IndexOf(")"), resultPost.Length - resultPost.IndexOf(")")).Replace("'", "");
+                학교코드 = resultPost;
+                resultPost = temp;
+                resultPost = resultPost.Remove(0, resultPost.IndexOf("학교주소")).Remove(0, 11);
+                temp = resultPost;
+                resultPost = resultPost.Remove(resultPost.IndexOf("</li>"), resultPost.Length - resultPost.IndexOf("</li>"));
+                학교주소 = resultPost;
+                resultPost = temp;
+                //  Console.WriteLine(resultPost);
+                resultPost = resultPost.Remove(0, resultPost.IndexOf("홈페이지")).Remove(0, 38);
+                temp = resultPost;
+                resultPost = resultPost.Remove(resultPost.IndexOf("target"), resultPost.Length - resultPost.IndexOf("target"));
+                resultPost = resultPost.Remove(resultPost.Length - 2, 1);
+                학교홈페이지 = resultPost;
+                resultPost = temp;
+                학교정보들.Add(new 학교정보(학교홈페이지, 학교주소, 학교코드, 학교이름, 초중고));
+            }
+            return 학교정보들;
+        }
+
+        public static bool isContainHangul(string s)
+        {
+
+            char[] charArr = s.ToCharArray();
+            foreach (char c in charArr)
+            {
+                if (char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherLetter)
+                {
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
+    }
+
     public class 급식
     {
         public int 날짜 = 0;
@@ -120,9 +266,12 @@ namespace schoolluch_bot
 
             return IsCheck;
         }
-        private static readonly TelegramBotClient Bot = new TelegramBotClient("APIKEY");
+
+        private static readonly TelegramBotClient Bot = new TelegramBotClient("API");
         static Dictionary<long, 받은급식정보> 급식저장 = new Dictionary<long, 받은급식정보>();
         static List<급식구독자> 구독자정보 = new List<급식구독자>();
+        static Dictionary<long, bool> 학교코드입력단계 = new Dictionary<long, bool>();
+        static Dictionary<long, List<학교정보>> 학교검색결과 = new Dictionary<long, List<학교정보>>();
         static List<급식> 급식불러오기(int Years,int Month,string ID, 관할지역 지역, 학교종류 종류)
         {
             string ResultOfstring = "0";
@@ -469,7 +618,7 @@ namespace schoolluch_bot
 
         private static async void BotOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
         {
-
+          
             var message = messageEventArgs.Message;
             if (message == null || message.Type != MessageType.TextMessage) return;
 
@@ -491,7 +640,8 @@ namespace schoolluch_bot
                     new [] // last row
                     {
                         new KeyboardButton("/특정한날의급식"),
-                        new KeyboardButton("/구독취소")
+                        new KeyboardButton("/구독취소"),
+                        new KeyboardButton("/학교코드검색")
                     }
                 });
                 await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
@@ -608,7 +758,36 @@ namespace schoolluch_bot
                 }
 
             }
-            else if(!급식저장.ContainsKey(message.Chat.Id))
+            else if (message.Text.StartsWith("/학교코드검색"))
+            {
+                학교코드입력단계[message.Chat.Id] = true;
+                await Bot.SendTextMessageAsync(message.Chat.Id, "검색할 학교를 입력해주세요.", replyMarkup: new ReplyKeyboardHide());
+            }
+            else if (학교코드입력단계.ContainsKey(message.Chat.Id))
+            {
+                string 조합 = "";
+                int i = 0;
+                await Bot.SendTextMessageAsync(message.Chat.Id, "처리중....");
+                학교검색결과.Add(message.Chat.Id,학교정보처리.학교정보파싱(message.Text));
+                foreach (학교정보 aed in 학교검색결과[message.Chat.Id])
+                {
+                    i++;
+                    var fields = typeof(학교정보).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    var names = Array.ConvertAll(fields, field => field.Name);
+                    조합 += i + "\r\n";
+                    foreach (string 필드명 in names)
+                    {
+                        FieldInfo fld = typeof(학교정보).GetField(필드명);
+                        조합 += 필드명 + " : " + fld.GetValue(aed) + "\r\n";
+                    }
+                    조합 += "-------------------------";
+                    await Bot.SendTextMessageAsync(message.Chat.Id, 조합);
+                    조합 = "";
+                }
+                학교코드입력단계.Remove(message.Chat.Id);
+                학교검색결과.Remove(message.Chat.Id);
+            }
+            else if (!급식저장.ContainsKey(message.Chat.Id))
             {
                 도움말(message.Chat.Id);
             }
