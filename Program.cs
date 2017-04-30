@@ -772,20 +772,29 @@ namespace schoolluch_bot
                 int i = 0;
                 await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "처리중....");
                 학교검색결과.Add(message.Chat.Id.Identifier,학교정보처리.학교정보파싱(message.Text));
-                foreach (학교정보 aed in 학교검색결과[message.Chat.Id.Identifier])
+                if (학교검색결과[message.Chat.Id.Identifier].Count != 0)
                 {
-                    i++;
-                    var fields = typeof(학교정보).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    var names = Array.ConvertAll(fields, field => field.Name);
-                    조합 += i + "\r\n";
-                    foreach (string 필드명 in names)
+                    foreach (학교정보 aed in 학교검색결과[message.Chat.Id.Identifier])
                     {
-                        FieldInfo fld = typeof(학교정보).GetField(필드명);
-                        조합 += 필드명 + " : " + fld.GetValue(aed) + "\r\n";
+                        i++;
+                        var fields =
+                            typeof(학교정보).GetFields(BindingFlags.Public | BindingFlags.NonPublic |
+                                                   BindingFlags.Instance);
+                        var names = Array.ConvertAll(fields, field => field.Name);
+                        조합 += i + "\r\n";
+                        foreach (string 필드명 in names)
+                        {
+                            FieldInfo fld = typeof(학교정보).GetField(필드명);
+                            조합 += 필드명 + " : " + fld.GetValue(aed) + "\r\n";
+                        }
+                        조합 += "-------------------------";
+                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, 조합);
+                        조합 = "";
                     }
-                    조합 += "-------------------------";
-                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, 조합);
-                    조합 = "";
+                }
+                else
+                {
+                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교를 찾을수없습니다");
                 }
                 학교코드입력단계.Remove(message.Chat.Id.Identifier);
                 학교검색결과.Remove(message.Chat.Id.Identifier);
