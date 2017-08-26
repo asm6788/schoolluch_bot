@@ -459,10 +459,13 @@ namespace schoolluch_bot
             timer.Start();
             List<급식구독자> p = new List<급식구독자>();
             BinaryFormatter binFmt = new BinaryFormatter();
-            using (FileStream rdr = new FileStream("구독자", FileMode.Open))
+            if (System.IO.File.Exists("구독자"))
             {
-                p = (List<급식구독자>)binFmt.Deserialize(rdr);
-                rdr.Dispose();
+                using (FileStream rdr = new FileStream("구독자", FileMode.Open))
+                {
+                    p = (List<급식구독자>)binFmt.Deserialize(rdr);
+                    rdr.Dispose();
+                }
             }
             구독자정보 = p;     
             Console.Title = me.Username;
@@ -625,10 +628,10 @@ namespace schoolluch_bot
 
             if (message.Text.StartsWith("/취소"))
             {
-                급식저장.Remove(message.Chat.Id.Identifier);
-                학교코드입력단계.Remove(message.Chat.Id.Identifier);
-                학교검색결과.Remove(message.Chat.Id.Identifier);
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "취소되였습니다", replyMarkup: new ReplyKeyboardRemove());
+                급식저장.Remove(message.Chat.Id);
+                학교코드입력단계.Remove(message.Chat.Id);
+                학교검색결과.Remove(message.Chat.Id);
+                await Bot.SendTextMessageAsync(message.Chat.Id, "취소되였습니다", replyMarkup: new ReplyKeyboardRemove());
             }
             else if (message.Text.ToLower().StartsWith("/start")) // send custom keyboard
             {
@@ -647,7 +650,7 @@ namespace schoolluch_bot
                         new KeyboardButton("/학교코드검색")
                     }
                 });
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "Choose",
+                await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
                     replyMarkup: keyboard);
             }
             else if (message.Text.StartsWith("/오늘의급식"))
@@ -666,8 +669,8 @@ namespace schoolluch_bot
                     }
                   });
 
-                급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.오늘의급식, false);
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "Choose",
+                급식저장[message.Chat.Id] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.오늘의급식, false);
+                await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
                           replyMarkup: keyboard);
             }
             else if (message.Text.StartsWith("/내일의급식"))
@@ -686,8 +689,8 @@ namespace schoolluch_bot
                     }
                   });
 
-                급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.내일의급식, false);
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "Choose",
+                급식저장[message.Chat.Id] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.내일의급식, false);
+                await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
                           replyMarkup: keyboard);
             }
             else if (message.Text.StartsWith("/특정한날의급식"))
@@ -706,8 +709,8 @@ namespace schoolluch_bot
                     }
                   });
 
-                급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.특정날의급식, false);
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "Choose",
+                급식저장[message.Chat.Id] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.특정날의급식, false);
+                await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
                           replyMarkup: keyboard);
             }
             else if (message.Text.StartsWith("/구독신청"))
@@ -715,10 +718,10 @@ namespace schoolluch_bot
                 bool 찾음 = false;
                 for (int i = 0; i < 구독자정보.Count; i++)
                 {
-                    if (구독자정보[i].ID == message.Chat.Id.Identifier)
+                    if (구독자정보[i].ID == message.Chat.Id)
                     {
                         찾음 = true;
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "이미 등록되셨습니다");
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "이미 등록되셨습니다");
                     }
                 }
                 if (!찾음)
@@ -737,8 +740,8 @@ namespace schoolluch_bot
                     }
                   });
 
-                    급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.특정날의급식, true);
-                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "Choose",
+                    급식저장[message.Chat.Id] = new 받은급식정보(학교종류.None, 관할지역.None, "", 받은급식정보.어느날의급식.특정날의급식, true);
+                    await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
                               replyMarkup: keyboard);
                 }
             }
@@ -747,34 +750,34 @@ namespace schoolluch_bot
                 bool 찾음 = false;
                 for (int i = 0; i < 구독자정보.Count; i++)
                 {
-                    if (구독자정보[i].ID == message.Chat.Id.Identifier)
+                    if (구독자정보[i].ID == message.Chat.Id)
                     {
                         찾음 = true;
                         구독자정보.RemoveAt(i);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "처리완료");
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "처리완료");
                     }
                 }
 
                 if (!찾음)
                 {
-                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "등록되있지않습니다");
+                    await Bot.SendTextMessageAsync(message.Chat.Id, "등록되있지않습니다");
                 }
 
             }
             else if (message.Text.StartsWith("/학교코드검색"))
             {
-                학교코드입력단계[message.Chat.Id.Identifier] = true;
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "검색할 학교를 입력해주세요.", replyMarkup: new ReplyKeyboardRemove());
+                학교코드입력단계[message.Chat.Id] = true;
+                await Bot.SendTextMessageAsync(message.Chat.Id, "검색할 학교를 입력해주세요.", replyMarkup: new ReplyKeyboardRemove());
             }
-            else if (학교코드입력단계.ContainsKey(message.Chat.Id.Identifier))
+            else if (학교코드입력단계.ContainsKey(message.Chat.Id))
             {
                 string 조합 = "";
                 int i = 0;
-                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "처리중....");
-                학교검색결과.Add(message.Chat.Id.Identifier,학교정보처리.학교정보파싱(message.Text));
-                if (학교검색결과[message.Chat.Id.Identifier].Count != 0)
+                await Bot.SendTextMessageAsync(message.Chat.Id, "처리중....");
+                학교검색결과.Add(message.Chat.Id,학교정보처리.학교정보파싱(message.Text));
+                if (학교검색결과[message.Chat.Id].Count != 0)
                 {
-                    foreach (학교정보 aed in 학교검색결과[message.Chat.Id.Identifier])
+                    foreach (학교정보 aed in 학교검색결과[message.Chat.Id])
                     {
                         i++;
                         var fields =
@@ -788,178 +791,178 @@ namespace schoolluch_bot
                             조합 += 필드명 + " : " + fld.GetValue(aed) + "\r\n";
                         }
                         조합 += "-------------------------";
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, 조합);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, 조합);
                         조합 = "";
                     }
                 }
                 else
                 {
-                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교를 찾을수없습니다");
+                    await Bot.SendTextMessageAsync(message.Chat.Id, "학교를 찾을수없습니다");
                 }
-                학교코드입력단계.Remove(message.Chat.Id.Identifier);
-                학교검색결과.Remove(message.Chat.Id.Identifier);
+                학교코드입력단계.Remove(message.Chat.Id);
+                학교검색결과.Remove(message.Chat.Id);
             }
-            else if (!급식저장.ContainsKey(message.Chat.Id.Identifier))
+            else if (!급식저장.ContainsKey(message.Chat.Id))
             {
-                도움말(message.Chat.Id.Identifier);
+                도움말(message.Chat.Id);
             }
-            else if (급식저장[message.Chat.Id.Identifier].학교종류 == 학교종류.None && 급식저장[message.Chat.Id.Identifier].관활지역 == 관할지역.None && 급식저장[message.Chat.Id.Identifier].학교코드 == "")
+            else if (급식저장[message.Chat.Id].학교종류 == 학교종류.None && 급식저장[message.Chat.Id].관활지역 == 관할지역.None && 급식저장[message.Chat.Id].학교코드 == "")
             {
                 switch (message.Text)
                 {
                     case "병설유치원":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.병설유치원, 관할지역.None, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        어디구역(message.Chat.Id.Identifier);
+                        급식저장[message.Chat.Id] = new 받은급식정보(학교종류.병설유치원, 관할지역.None, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        어디구역(message.Chat.Id);
                         break;
                     case "초등학교":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.초등학교, 관할지역.None, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        어디구역(message.Chat.Id.Identifier);
+                        급식저장[message.Chat.Id] = new 받은급식정보(학교종류.초등학교, 관할지역.None, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        어디구역(message.Chat.Id);
                         break;
                     case "중학교":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.중학교, 관할지역.None, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        어디구역(message.Chat.Id.Identifier);
+                        급식저장[message.Chat.Id] = new 받은급식정보(학교종류.중학교, 관할지역.None, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        어디구역(message.Chat.Id);
                         break;
                     case "고등학교":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.고등학교, 관할지역.None, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        어디구역(message.Chat.Id.Identifier);
+                        급식저장[message.Chat.Id] = new 받은급식정보(학교종류.고등학교, 관할지역.None, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        어디구역(message.Chat.Id);
                         break;
                     default:
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(학교종류.None, 관할지역.None, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "올바르지 않은 입력입니다");
+                        급식저장[message.Chat.Id] = new 받은급식정보(학교종류.None, 관할지역.None, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "올바르지 않은 입력입니다");
                         break;
                 }
                 
             }
-            else if (급식저장[message.Chat.Id.Identifier].학교종류 != 학교종류.None && 급식저장[message.Chat.Id.Identifier].관활지역 == 관할지역.None && 급식저장[message.Chat.Id.Identifier].학교코드 == "")
+            else if (급식저장[message.Chat.Id].학교종류 != 학교종류.None && 급식저장[message.Chat.Id].관활지역 == 관할지역.None && 급식저장[message.Chat.Id].학교코드 == "")
             {
                 switch (message.Text)
                 {
                     case "서울":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.서울특별시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.서울특별시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "인천":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.인천광역시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.인천광역시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "부산":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.부산광역시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.부산광역시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "세종":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.세종특별자치시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.세종특별자치시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "경기":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.경기도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.경기도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "충북":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.충청북도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.충청북도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "경북":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.경상북도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.경상북도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "전북":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.전라북도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.전라북도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "광주":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.광주광역시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.광주광역시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "대전":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.대전광역시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.대전광역시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "대구":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.대구광역시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.대구광역시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "울산":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.울산광역시, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.울산광역시, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "강원":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.강원도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.강원도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "충남":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.충청남도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.충청남도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "경남":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.경상남도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.경상남도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "전남":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.전라남도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.전라남도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     case "제주":
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.제주도, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.제주도, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:", replyMarkup: new ReplyKeyboardRemove());
                         break;
                     default:
-                        급식저장[message.Chat.Id.Identifier] = new 받은급식정보(급식저장[message.Chat.Id.Identifier].학교종류, 관할지역.None, "", 급식저장[message.Chat.Id.Identifier].어느날, 급식저장[message.Chat.Id.Identifier].구독신청);
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "올바르지 않은 입력입니다");
+                        급식저장[message.Chat.Id] = new 받은급식정보(급식저장[message.Chat.Id].학교종류, 관할지역.None, "", 급식저장[message.Chat.Id].어느날, 급식저장[message.Chat.Id].구독신청);
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "올바르지 않은 입력입니다");
                         break;
                 }
               
             }
-            else if (급식저장[message.Chat.Id.Identifier].학교종류 != 학교종류.None && 급식저장[message.Chat.Id.Identifier].관활지역 != 관할지역.None && 급식저장[message.Chat.Id.Identifier].학교코드 == "")
+            else if (급식저장[message.Chat.Id].학교종류 != 학교종류.None && 급식저장[message.Chat.Id].관활지역 != 관할지역.None && 급식저장[message.Chat.Id].학교코드 == "")
             {
                 if (Regex.IsMatch(message.Text, @"[A-Z]\d{9}"))
                 {
-                    급식저장[message.Chat.Id.Identifier].학교코드 = message.Text;
-                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "완료");
-                    if (급식저장[message.Chat.Id.Identifier].어느날 == 받은급식정보.어느날의급식.오늘의급식)
+                    급식저장[message.Chat.Id].학교코드 = message.Text;
+                    await Bot.SendTextMessageAsync(message.Chat.Id, "완료");
+                    if (급식저장[message.Chat.Id].어느날 == 받은급식정보.어느날의급식.오늘의급식)
                     {
                         bool 찾음 = false;
-                        List<급식> 급식메뉴다 = 급식불러오기(DateTime.Now.Year, DateTime.Now.Month, 급식저장[message.Chat.Id.Identifier].학교코드, 급식저장[message.Chat.Id.Identifier].관활지역, 급식저장[message.Chat.Id.Identifier].학교종류);
+                        List<급식> 급식메뉴다 = 급식불러오기(DateTime.Now.Year, DateTime.Now.Month, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
                         for (int i = 0; i < 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == DateTime.Now.Day)
                             {
-                                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, 급식메뉴다[i].급식메뉴);
+                                await Bot.SendTextMessageAsync(message.Chat.Id, 급식메뉴다[i].급식메뉴);
                                 찾음 = true;
                                 break;
                             }
                         }
                         if (!찾음)
                         {
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "해당 급식이 없습니다");
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "해당 급식이 없습니다");
                         }
-                        급식저장.Remove(message.Chat.Id.Identifier);
+                        급식저장.Remove(message.Chat.Id);
                     }
-                    else if (급식저장[message.Chat.Id.Identifier].구독신청)
+                    else if (급식저장[message.Chat.Id].구독신청)
                     {
-                        구독자정보.Add(new 급식구독자(message.Chat.Id.Identifier, 급식저장[message.Chat.Id.Identifier]));
-                       await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "구독신청되였습니다");
+                        구독자정보.Add(new 급식구독자(message.Chat.Id, 급식저장[message.Chat.Id]));
+                       await Bot.SendTextMessageAsync(message.Chat.Id, "구독신청되였습니다");
                     }
-                    else if (급식저장[message.Chat.Id.Identifier].어느날 == 받은급식정보.어느날의급식.내일의급식)
+                    else if (급식저장[message.Chat.Id].어느날 == 받은급식정보.어느날의급식.내일의급식)
                     {
                         DateTime 내일 = DateTime.Now.AddDays(1);
                         bool 찾음 = false;
-                        List<급식> 급식메뉴다 = 급식불러오기(내일.Year, 내일.Month, 급식저장[message.Chat.Id.Identifier].학교코드, 급식저장[message.Chat.Id.Identifier].관활지역, 급식저장[message.Chat.Id.Identifier].학교종류);
+                        List<급식> 급식메뉴다 = 급식불러오기(내일.Year, 내일.Month, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
                         for (int i = 0; i < 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == 내일.Day)
                             {
-                                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, 급식메뉴다[i].급식메뉴);
+                                await Bot.SendTextMessageAsync(message.Chat.Id, 급식메뉴다[i].급식메뉴);
                                 찾음 = true;
                                 break;
                             }
                         }
                         if (!찾음)
                         {
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "해당 급식이 없습니다");
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "해당 급식이 없습니다");
                         }
-                        급식저장.Remove(message.Chat.Id.Identifier);
+                        급식저장.Remove(message.Chat.Id);
                     }
-                    else if (급식저장[message.Chat.Id.Identifier].어느날 == 받은급식정보.어느날의급식.특정날의급식)
+                    else if (급식저장[message.Chat.Id].어느날 == 받은급식정보.어느날의급식.특정날의급식)
                     {
                         var keyboard = new ReplyKeyboardMarkup(new[]
                         {
@@ -982,106 +985,106 @@ namespace schoolluch_bot
                         new KeyboardButton("12월")
                     }
                         });
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "Choose",
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "Choose",
                                  replyMarkup: keyboard);
                     }
                 }
                 else
                 {
-                    await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "학교코드를 입력하십시요:");
+                    await Bot.SendTextMessageAsync(message.Chat.Id, "학교코드를 입력하십시요:");
                 }
             }
-            else if (급식저장[message.Chat.Id.Identifier].학교종류 != 학교종류.None && 급식저장[message.Chat.Id.Identifier].관활지역 != 관할지역.None && 급식저장[message.Chat.Id.Identifier].학교코드 != "" && 급식저장[message.Chat.Id.Identifier].어느날 == 받은급식정보.어느날의급식.특정날의급식)
+            else if (급식저장[message.Chat.Id].학교종류 != 학교종류.None && 급식저장[message.Chat.Id].관활지역 != 관할지역.None && 급식저장[message.Chat.Id].학교코드 != "" && 급식저장[message.Chat.Id].어느날 == 받은급식정보.어느날의급식.특정날의급식)
             {
                 bool 찾음 = false;
                 List<급식> 급식메뉴다 = null;
-                if (급식저장[message.Chat.Id.Identifier].월 == 0)
+                if (급식저장[message.Chat.Id].월 == 0)
                 {
                     switch (message.Text)
                     {
                         case "1월":
-                            급식저장[message.Chat.Id.Identifier].월 = 1;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 1;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "2월":
-                            급식저장[message.Chat.Id.Identifier].월 = 2;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 2;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "3월":
-                            급식저장[message.Chat.Id.Identifier].월 = 3;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 3;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "4월":
-                            급식저장[message.Chat.Id.Identifier].월 = 4;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 4;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "5월":
-                            급식저장[message.Chat.Id.Identifier].월 = 5;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 5;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "6월":
-                            급식저장[message.Chat.Id.Identifier].월 = 6;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 6;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "7월":
-                            급식저장[message.Chat.Id.Identifier].월 = 7;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 7;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "8월":
-                            급식저장[message.Chat.Id.Identifier].월 = 8;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 8;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "9월":
-                            급식저장[message.Chat.Id.Identifier].월 = 9;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 9;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "10월":
-                            급식저장[message.Chat.Id.Identifier].월 = 10;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 10;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "11월":
-                            급식저장[message.Chat.Id.Identifier].월 = 11;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 11;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         case "12월":
-                            급식저장[message.Chat.Id.Identifier].월 = 12;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
+                            급식저장[message.Chat.Id].월 = 12;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)", replyMarkup: new ReplyKeyboardRemove());
                             break;
                         default:
-                            급식저장[message.Chat.Id.Identifier].월 = 0;
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "올바르지 않은 입력입니다");
+                            급식저장[message.Chat.Id].월 = 0;
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "올바르지 않은 입력입니다");
                             break;
                     }
                 }
-                else if (급식저장[message.Chat.Id.Identifier].일 == 0)
+                else if (급식저장[message.Chat.Id].일 == 0)
                 {
-                    if (int.TryParse(message.Text, out 급식저장[message.Chat.Id.Identifier].일))
+                    if (int.TryParse(message.Text, out 급식저장[message.Chat.Id].일))
                     {
-                        급식메뉴다 = 급식불러오기(DateTime.Now.Year, 급식저장[message.Chat.Id.Identifier].월, 급식저장[message.Chat.Id.Identifier].학교코드, 급식저장[message.Chat.Id.Identifier].관활지역, 급식저장[message.Chat.Id.Identifier].학교종류);
+                        급식메뉴다 = 급식불러오기(DateTime.Now.Year, 급식저장[message.Chat.Id].월, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
                         for (int i = 0; i < 급식메뉴다.Count; i++)
                         {
-                            if (급식메뉴다[i].날짜 == 급식저장[message.Chat.Id.Identifier].일)
+                            if (급식메뉴다[i].날짜 == 급식저장[message.Chat.Id].일)
                             {
-                                await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, 급식메뉴다[i].급식메뉴);
+                                await Bot.SendTextMessageAsync(message.Chat.Id, 급식메뉴다[i].급식메뉴);
                                 찾음 = true;
                                 break;
                             }
                         }
                         if (!찾음)
                         {
-                            await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "해당 급식이 없습니다");
+                            await Bot.SendTextMessageAsync(message.Chat.Id, "해당 급식이 없습니다");
                         }
 
-                        급식저장.Remove(message.Chat.Id.Identifier);
+                        급식저장.Remove(message.Chat.Id);
                     }
                     else
                     {
-                        await Bot.SendTextMessageAsync(message.Chat.Id.Identifier, "몇일?(그냥 숫자만 던져주세요)");
+                        await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)");
                     }
                 }
                 else
                 {
-                    도움말(message.Chat.Id.Identifier);
+                    도움말(message.Chat.Id);
                 }
             }
         }
