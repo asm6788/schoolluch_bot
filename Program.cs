@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -357,7 +357,7 @@ namespace schoolluch_bot
                 int 날짜 = 0;
                 List<급식> 내용 = new List<급식>();
                 배열 = htmlCode.Split("<br />".ToCharArray()).Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                for (int i = 1; i < 배열.Length; i++)
+                for (int i = 1; i != 배열.Length; i++)
                 {
                     if (배열[i - 1].LastIndexOf(":") != -1)
                     {
@@ -376,7 +376,7 @@ namespace schoolluch_bot
                 List<급식> 결과 = new List<급식>();
                 급식 temp = new 급식();
                 string temp2 = "";
-                for (int i = 0; i < 내용.Count; i++)
+                for (int i = 0; i != 내용.Count; i++)
                 {
                     if (i == 0)
                     {
@@ -386,7 +386,7 @@ namespace schoolluch_bot
                     {
                         temp2 = temp2 + "\r\n" + 내용[i].급식메뉴;
                     }
-                    else
+                    else 
                     {
                         if (내용[i].급식메뉴.Length > 0 && temp2.Length - 1 >0 && temp2.Length - 2 > 0)
                         {
@@ -409,6 +409,7 @@ namespace schoolluch_bot
                         temp = 내용[i];
                     }
                 }
+                결과.Add(new 급식(temp.날짜, temp2));
 
                 return 결과;
             }
@@ -455,7 +456,6 @@ namespace schoolluch_bot
 
             var me = Bot.GetMeAsync().Result;
             timer = new System.Timers.Timer(TimeSpan.FromHours(24 - DateTime.Now.Hour).TotalMilliseconds);
-            timer.Elapsed += Timer_Elapsed;
             timer.Start();
             List<급식구독자> p = new List<급식구독자>();
             BinaryFormatter binFmt = new BinaryFormatter();
@@ -527,10 +527,11 @@ namespace schoolluch_bot
             bool 찾음 = false;
             Console.WriteLine("급식구독자 급식전송중");
             List<급식> 급식메뉴다 = new List<급식>();
-            for (int i = 0; i < 구독자정보.Count; i++)
+            for (int i = 0; i != 구독자정보.Count; i++)
             {
+                Console.WriteLine(i);
                 급식메뉴다 = 급식불러오기(DateTime.Now.Year, DateTime.Now.Month, Convert.ToString(구독자정보[i].급식정정보들.학교코드), 구독자정보[i].급식정정보들.관활지역, 구독자정보[i].급식정정보들.학교종류);
-                for (int ii = 0; ii < 급식메뉴다.Count; ii++)
+                for (int ii = 0; ii != 급식메뉴다.Count; ii++)
                 {
                     if (급식메뉴다[ii].날짜 == DateTime.Now.Day)
                     {
@@ -716,7 +717,7 @@ namespace schoolluch_bot
             else if (message.Text.StartsWith("/구독신청"))
             {
                 bool 찾음 = false;
-                for (int i = 0; i < 구독자정보.Count; i++)
+                for (int i = 0; i != 구독자정보.Count; i++)
                 {
                     if (구독자정보[i].ID == message.Chat.Id)
                     {
@@ -748,7 +749,7 @@ namespace schoolluch_bot
             else if (message.Text.StartsWith("/구독취소"))
             {
                 bool 찾음 = false;
-                for (int i = 0; i < 구독자정보.Count; i++)
+                for (int i = 0; i != 구독자정보.Count; i++)
                 {
                     if (구독자정보[i].ID == message.Chat.Id)
                     {
@@ -922,7 +923,7 @@ namespace schoolluch_bot
                     {
                         bool 찾음 = false;
                         List<급식> 급식메뉴다 = 급식불러오기(DateTime.Now.Year, DateTime.Now.Month, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
-                        for (int i = 0; i < 급식메뉴다.Count; i++)
+                        for (int i = 0; i != 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == DateTime.Now.Day)
                             {
@@ -947,7 +948,7 @@ namespace schoolluch_bot
                         DateTime 내일 = DateTime.Now.AddDays(1);
                         bool 찾음 = false;
                         List<급식> 급식메뉴다 = 급식불러오기(내일.Year, 내일.Month, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
-                        for (int i = 0; i < 급식메뉴다.Count; i++)
+                        for (int i = 0; i != 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == 내일.Day)
                             {
@@ -1061,7 +1062,7 @@ namespace schoolluch_bot
                     if (int.TryParse(message.Text, out 급식저장[message.Chat.Id].일))
                     {
                         급식메뉴다 = 급식불러오기(DateTime.Now.Year, 급식저장[message.Chat.Id].월, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
-                        for (int i = 0; i < 급식메뉴다.Count; i++)
+                        for (int i = 0; i != 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == 급식저장[message.Chat.Id].일)
                             {
@@ -1103,3 +1104,4 @@ namespace schoolluch_bot
 
     }
 }
+
