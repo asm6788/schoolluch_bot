@@ -456,6 +456,7 @@ namespace schoolluch_bot
 
             var me = Bot.GetMeAsync().Result;
             timer = new System.Timers.Timer(TimeSpan.FromHours(24 - DateTime.Now.Hour).TotalMilliseconds);
+            timer.Elapsed += Timer_Elapsed;
             timer.Start();
             List<급식구독자> p = new List<급식구독자>();
             BinaryFormatter binFmt = new BinaryFormatter();
