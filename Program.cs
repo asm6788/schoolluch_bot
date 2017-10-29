@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -999,7 +999,7 @@ namespace schoolluch_bot
             else if (message.Text.StartsWith("/구독신청"))
             {
                 bool 찾음 = false;
-                for (int i = 0; i < 구독자정보.Count; i++)
+                for (int i = 0; i != 구독자정보.Count; i++)
                 {
                     if (구독자정보[i].ID == message.Chat.Id)
                     {
@@ -1031,7 +1031,7 @@ namespace schoolluch_bot
             else if (message.Text.StartsWith("/구독취소"))
             {
                 bool 찾음 = false;
-                for (int i = 0; i < 구독자정보.Count; i++)
+                for (int i = 0; i != 구독자정보.Count; i++)
                 {
                     if (구독자정보[i].ID == message.Chat.Id)
                     {
@@ -1420,7 +1420,7 @@ namespace schoolluch_bot
                     {
                         bool 찾음 = false;
                         List<급식> 급식메뉴다 = 급식불러오기(DateTime.Now.Year, DateTime.Now.Month, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
-                        for (int i = 0; i < 급식메뉴다.Count; i++)
+                        for (int i = 0; i != 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == DateTime.Now.Day)
                             {
@@ -1440,7 +1440,7 @@ namespace schoolluch_bot
                         DateTime 내일 = DateTime.Now.AddDays(1);
                         bool 찾음 = false;
                         List<급식> 급식메뉴다 = 급식불러오기(내일.Year, 내일.Month, 급식저장[message.Chat.Id].학교코드, 급식저장[message.Chat.Id].관활지역, 급식저장[message.Chat.Id].학교종류);
-                        for (int i = 0; i < 급식메뉴다.Count; i++)
+                        for (int i = 0; i != 급식메뉴다.Count; i++)
                         {
                             if (급식메뉴다[i].날짜 == 내일.Day)
                             {
@@ -1606,3 +1606,4 @@ namespace schoolluch_bot
 
     }
 }
+
