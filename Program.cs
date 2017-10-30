@@ -488,12 +488,13 @@ namespace schoolluch_bot
                                     temp2 = temp2.Remove(temp2.Length - 1, 1);
                                 }
                             }
-                            결과.Add(new 급식(temp.날짜, temp2));
+                            결과.Add(new 급식(temp.날짜, temp2.Replace(":", "")));
                             temp2 = "";
 
                             temp = 내용[i];
                         }
                     }
+                    결과.Add(new 급식(temp.날짜, temp2));
                     결과 = 결과.Where(s => !string.IsNullOrWhiteSpace(s.급식메뉴)).Distinct().ToList();
                     결과.RemoveAll(x => x.날짜 < 1);
                     결과.RemoveAll(x => x.날짜 > 31);
