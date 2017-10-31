@@ -620,6 +620,7 @@ namespace schoolluch_bot
                 }
                 if (개인알림구독자정보.Count != 0)
                 {
+                    개인별급식알림.Elapsed += 개인급식구독전송;
                     bool Found = false;
                     foreach (급식구독자 개인 in 개인알림구독자정보)
                     {
@@ -627,14 +628,12 @@ namespace schoolluch_bot
                         {
                             Found = true;
                             개인별급식알림.Interval = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second).Subtract(개인.알림시간).TotalMilliseconds;
-                            개인별급식알림.Elapsed += 개인급식구독전송;
                             개인별급식알림.Start();
                         }
                     }
                     if(!Found)
                     {
                         개인별급식알림.Interval = new TimeSpan(1, 개인알림구독자정보[0].알림시간.Hours, 개인알림구독자정보[0].알림시간.Minutes, 개인알림구독자정보[0].알림시간.Seconds).Subtract(new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)).TotalMilliseconds;
-                        개인별급식알림.Elapsed += 개인급식구독전송;
                         개인별급식알림.Start();
                     }
                 }
@@ -664,8 +663,8 @@ namespace schoolluch_bot
         static int index = 0;
         private static void 개인급식구독전송(object sender, System.Timers.ElapsedEventArgs e)
         {
-            Console.WriteLine(e.SignalTime + " 급식 정보 전송 ID:" + 구독자정보[index].ID + " INDEX: " + index);
-            SendSubscriberMeals(구독자정보[index]);
+            Console.WriteLine(e.SignalTime + " 급식 정보 전송 ID:" + 개인알림구독자정보[index].ID + " INDEX: " + index);
+            SendSubscriberMeals(개인알림구독자정보[index]);
             if (index == 개인알림구독자정보.Count)
             {
                 구독자정보 = 구독자정보.OrderBy(w => w.알림시간).ToList();
@@ -1383,7 +1382,18 @@ namespace schoolluch_bot
                     자정알림구독자정보 = 자정알림구독자정보.OrderBy(w => w.알림시간).ToList();
                     if (!개인별급식알림.Enabled)
                     {
-                        개인별급식알림.Interval = 개인알림구독자정보[0].알림시간.TotalMilliseconds;
+                        if(개인알림구독자정보[0].알림시간.CompareTo(new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)) == 1)
+                        {
+                            개인별급식알림.Interval = 개인알림구독자정보[0].알림시간.Subtract(new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)).TotalMilliseconds;
+                        }
+                        else if(개인알림구독자정보[0].알림시간.CompareTo(new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)) == 0)
+                        {
+                            개인별급식알림.Interval = 0;
+                        }
+                        else 
+                        {
+                            개인별급식알림.Interval = new TimeSpan(1, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second).Subtract(개인알림구독자정보[0].알림시간).TotalMilliseconds;
+                        }
                         개인별급식알림.Elapsed += 개인급식구독전송;
                         개인별급식알림.Start();
                     }
