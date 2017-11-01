@@ -834,7 +834,32 @@ namespace schoolluch_bot
 
         static async void 도움말(long ID)
         {
-            var usage = "밥먹자! /start로 시작합니다 사전에 학교 코드를 알아합니다(NEIS 코드)\r\n/취소으로 취소할수있습니다";
+            var usage =
+@"밥먹자! /start로 시작합니다 사전에 학교 코드를 알아합니다(NEIS 코드)
+/취소으로 취소할수있습니다
+/start
+메인페이지
+
+/오늘의급식
+오늘의 급식을 불러옵니다(학교정보 DB연동 가능)
+
+/내일의급식
+내일의 급식을 불러옵니다(학교정보 DB연동 가능)
+
+/특정한날의급식
+특정한날의급식의 급식을 불러옵니다(학교정보 DB연동 가능)
+
+/구독신청
+새벽 12시.원하는 시간에 급식을 자동으로 전송해드립니다
+
+/구독취소
+구독을 취소합니다
+
+/학교코드검색
+급식을 불러올때 필요한 학교코드(NEIS코드)을 검색합니다
+
+/학교등록
+학교정보 DB로 사용자 학교를 저장하여 한번 입력하면 다시입력할 필요가 없습니다!학교정보 삭제도 여기서 처리합니다!";
 
             await Bot.SendTextMessageAsync(ID, usage,
                 replyMarkup: new ReplyKeyboardRemove());
@@ -1597,11 +1622,12 @@ namespace schoolluch_bot
                         await Bot.SendTextMessageAsync(message.Chat.Id, "몇일?(그냥 숫자만 던져주세요)");
                     }
                 }
-                else
-                {
-                    도움말(message.Chat.Id);
-                }
+                
             }  //일반적인 특별한 날짜 급식 파싱구문
+            else
+            {
+                도움말(message.Chat.Id);
+            }
         }
 
      
