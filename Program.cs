@@ -663,11 +663,11 @@ namespace schoolluch_bot
         static int index = 0;
         private static void 개인급식구독전송(object sender, System.Timers.ElapsedEventArgs e)
         {
+            개인알림구독자정보 = 개인알림구독자정보.OrderBy(w => w.알림시간).ToList();
             Console.WriteLine(e.SignalTime + " 급식 정보 전송 ID:" + 개인알림구독자정보[index].ID + " INDEX: " + index);
             SendSubscriberMeals(개인알림구독자정보[index]);
             if (index == 개인알림구독자정보.Count)
             {
-                개인알림구독자정보 = 개인알림구독자정보.OrderBy(w => w.알림시간).ToList();
                 개인별급식알림.Interval = new TimeSpan(1, 개인알림구독자정보[0].알림시간.Hours, 개인알림구독자정보[0].알림시간.Minutes, 개인알림구독자정보[0].알림시간.Seconds).Subtract(new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)).TotalMilliseconds;
                 index = 0;
             }
