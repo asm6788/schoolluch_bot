@@ -667,7 +667,7 @@ namespace schoolluch_bot
             SendSubscriberMeals(개인알림구독자정보[index]);
             if (index == 개인알림구독자정보.Count)
             {
-                구독자정보 = 구독자정보.OrderBy(w => w.알림시간).ToList();
+                개인알림구독자정보 = 개인알림구독자정보.OrderBy(w => w.알림시간).ToList();
                 개인별급식알림.Interval = new TimeSpan(1, 개인알림구독자정보[0].알림시간.Hours, 개인알림구독자정보[0].알림시간.Minutes, 개인알림구독자정보[0].알림시간.Seconds).Subtract(new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)).TotalMilliseconds;
                 index = 0;
             }
